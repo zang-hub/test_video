@@ -1,0 +1,36 @@
+name: 🎬 Make Crypto Video Daily
+
+on:
+  workflow_dispatch:      # Cho phép chạy thủ công
+  schedule:
+    - cron: "5 17 * * *"  # 00:05 AM mỗi ngày giờ VN (17:05 UTC hôm trước)
+
+jobs:
+  build-video:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          sudo apt update && sudo apt install -y ffmpeg
+
+      - name: Run make_video.py
+        env:
+          ELEVEN_API_KEY: ${{ secrets.ELEVEN_API_KEY }}
+        run: |
+          python make_video.py
+
+      - name: Upload video artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: crypto_video
+          path: video_*.mp4
